@@ -23,21 +23,20 @@ struct SNAKE
 	int *y;
 };
 
-void fill(char **array, int height, int width);
-void show(char **array, int height, int width, int score);
+void fill(char **array);
+void show(char **array, int score);
 void clear();
-void clear(int i);
 bool moveSnake(char **map, int *x, int *y, int x_dest, int y_dest, int snakePosition, int snakeSize);
-bool makeMove(int ch, char **map, int *x, int *y, int height, int width, int snakeSize, bool gamemode);
-void deletePointers(char **map, int width, int *x, int *y);
+bool makeMove(int ch, char **map, int *x, int *y, int snakeSize);
+void deletePointers(char **map, int *x, int *y);
 bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize);
 SNAKE createSnake(int snakeSize);
 SNAKE extendSnake(SNAKE snake, int *snakeSize);
-char **createMap(int height, int width);
+char **createMap();
 bool checkForPoint(int destX, int destY, int x, int y, int *score);
-void createApple(int *x, int *y, char **map, int height, int width);
-void setTerminalWindow(int width, int height);
-int playGame(int width, int height, int delay, bool gamemode);
+void createApple(int *x, int *y, char **map);
+void setTerminalWindow();
+int playGame();
 void showOptions(int menuCursor);
 void runOptions();
 void createGame();
@@ -64,7 +63,7 @@ int main()
 	return 0;
 }
 
-void fill(char **array, int height, int width)
+void fill(char **array)
 {
 	for (int i = 0; i < height; i++)
 	{
@@ -75,7 +74,7 @@ void fill(char **array, int height, int width)
 	}
 }
 
-void show(char **array, int height, int width, int score)
+void show(char **array, int score)
 {
 	string toPrint = "Score: ";
 	toPrint += to_string(score);
@@ -108,12 +107,6 @@ void clear()
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
 }
 
-void clear(int i)
-{
-	COORD cur = { 0, i };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
-}
-
 bool moveSnake(char **map, int *x, int *y, int x_dest, int y_dest, int snakePosition, int snakeSize)
 {
 	int x_old = x[snakePosition];
@@ -131,7 +124,7 @@ bool moveSnake(char **map, int *x, int *y, int x_dest, int y_dest, int snakePosi
 	return 1;
 }
 
-bool makeMove(int ch, char **map, int *x, int *y, int height, int width, int snakeSize, bool gamemode)
+bool makeMove(int ch, char **map, int *x, int *y, int snakeSize)
 {
 	switch (ch)
 	{
@@ -169,7 +162,7 @@ bool makeMove(int ch, char **map, int *x, int *y, int height, int width, int sna
 	return 1;
 }
 
-void deletePointers(char **map, int width, int *x, int *y)
+void deletePointers(char **map, int *x, int *y)
 {
 	for (int i = 0; i < width; i++)
 	{
@@ -224,7 +217,7 @@ SNAKE extendSnake(SNAKE snake, int *snakeSize)
 	return newSnake;
 }
 
-char **createMap(int height, int width)
+char **createMap()
 {
 	char **map = new char*[width];
 	for (int i = 0; i < width; i++)
@@ -244,7 +237,7 @@ bool checkForPoint(int destX, int destY, int x, int y, int *score)
 	return 0;
 }
 
-void createApple(int *x, int *y, char **map, int height, int width)
+void createApple(int *x, int *y, char **map)
 {
 	int celX = rand() % height;
 	int celY = rand() % width;
@@ -258,7 +251,7 @@ void createApple(int *x, int *y, char **map, int height, int width)
 	*y = celY;
 }
 
-void setTerminalWindow(int width, int height)
+void setTerminalWindow()
 {
 	HWND console = GetConsoleWindow();
 	RECT r;
@@ -266,16 +259,13 @@ void setTerminalWindow(int width, int height)
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	MoveWindow(console, r.left, r.top, width * 10 + 4, (height + 4) * 18, TRUE);
 }
-int playGame(int width, int height, int delay, bool gamemode)
+
+int playGame()
 {
-	setTerminalWindow(width, height);
+	setTerminalWindow();
 	int score = 0;
-	//COORD coord;
-	//coord.X = width*2;
-	//coord.Y = height*2;
-	//SetConsoleScreenBufferSize(handle, coord);
-	char **map = createMap(height, width);
-	fill(map, height, width);
+	char **map = createMap();
+	fill(map);
 	int snakeSize = 3;
 	SNAKE snake = createSnake(snakeSize);
 	snake = extendSnake(snake, &snakeSize);
@@ -285,11 +275,11 @@ int playGame(int width, int height, int delay, bool gamemode)
 	char direction = 'd';
 	int appleX;
 	int appleY;
-	createApple(&appleX, &appleY, map, height, width);
+	createApple(&appleX, &appleY, map);
 	while (stan)
 	{
 		clear();
-		show(map, height, width, score);
+		show(map, score);
 		if (_kbhit())
 		{
 			char key = _getch();
@@ -305,15 +295,15 @@ int playGame(int width, int height, int delay, bool gamemode)
 				direction = key;
 			}
 		}
-		stan = makeMove(direction, map, snake.x, snake.y, height, width, snakeSize - 1, gamemode) && checkCollision(snake.x[0], snake.y[0], snake.x, snake.y, snakeSize);
+		stan = makeMove(direction, map, snake.x, snake.y, snakeSize - 1) && checkCollision(snake.x[0], snake.y[0], snake.x, snake.y, snakeSize);
 		if (checkForPoint(snake.x[0], snake.y[0], appleX, appleY, &score))
 		{
-			createApple(&appleX, &appleY, map, height, width); snake = extendSnake(snake, &snakeSize);
+			createApple(&appleX, &appleY, map); snake = extendSnake(snake, &snakeSize);
 		}
 		Sleep(delay);
 		score++;
 	}
-	deletePointers(map, width, snake.x, snake.y);
+	deletePointers(map, snake.x, snake.y);
 	system("cls");
 	return score;
 }
@@ -321,7 +311,7 @@ int playGame(int width, int height, int delay, bool gamemode)
 void createGame()
 {
 	clear();
-	saveScore("test", playGame(width, height, delay, gamemode));
+	saveScore("test", playGame());
 }
 
 void exit()
@@ -329,16 +319,99 @@ void exit()
 	system("cls");
 }
 
-void changeOption(int menuCursor)
+int setIntValue()
+{
+	int value;
+	int buff;
+	system("cls");
+	cout << "Podaj wartosc: \n";
+	cin >> buff;
+	while (cin.fail())
+	{
+		cin.clear();
+		system("cls");
+		while (cin.get() != '\n') continue;
+		cout << "Prosze podac prawidlowa wartosc: \n";
+		cin >> buff;
+	} 
+	system("cls");
+	value = buff;
+	return value;
+}
+
+int speedOption(int menuCursor)
 {
 	switch (menuCursor)
 	{
-	case 0:
-	case 1:
-	case 2:
-	case 3:
-	case 4: exit();  break;
+	case 0: return 80; break;
+	case 1: return 40; break;
+	case 2:	return 20; break;
 	}
+	return 40;
+}
+
+int manageSpeedMenu(int menuCursor)
+{
+	char key = _getch();
+	switch (key)
+	{
+	case MOVE_MENU_CURSOR_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case MOVE_MENU_CURSOR_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case MOVE_MENU_CURSOR_ACCEPT: return -speedOption(menuCursor);
+	}
+	return menuCursor;
+}
+
+void showSpeedMenu(int menuCursor)
+{
+	string choices[3] = { "Wolno   ", "Standardowo   ", "Szybko   "};
+	string toPrint = "Wybierz predkosc rozgrywki\n";
+	toPrint = "\n";
+	for (int i = 0; i < 3; i++)
+	{
+		toPrint += "  ";
+		if (i == menuCursor)
+		{
+			toPrint += " >";
+		}
+		toPrint += choices[i];
+		toPrint += "\n";
+	}
+	cout << toPrint;
+}
+
+int setGameSpeed()
+{
+	system("cls");
+	int menuCursor = 0;
+	string toPrint = "";
+	do
+	{
+		showSpeedMenu(menuCursor);
+		menuCursor = manageSpeedMenu(menuCursor);
+		clear();
+	} while (menuCursor >= 0);
+	return -menuCursor;
+}
+
+bool changeGamemode()
+{
+	return !gamemode;
+}
+
+
+
+int changeOption(int menuCursor)
+{
+	switch (menuCursor)
+	{
+	case 0: width = setIntValue(); break;
+	case 1: height = setIntValue(); break;
+	case 2:	delay = setGameSpeed(); break;
+	case 3: gamemode = changeGamemode(); break;
+	case 4: exit(); return QUIT;
+	}
+	return 0;
 }
 
 int manageOptions(int menuCursor)
@@ -348,14 +421,25 @@ int manageOptions(int menuCursor)
 	{
 	case MOVE_MENU_CURSOR_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
 	case MOVE_MENU_CURSOR_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_ACCEPT: changeOption(menuCursor); return QUIT;
+	case MOVE_MENU_CURSOR_ACCEPT: return changeOption(menuCursor);
 	}
 	return menuCursor;
 }
 
+string getGameSpeed()
+{
+	switch (delay)
+	{
+	case 80: return "Predkosc gry: wolna    "; break;
+	case 40: return "Predkosc gry: standardowa    "; break;
+	}
+	return "Predkosc gry: szybka    ";
+}
+
 void showOptions(int menuCursor)
 {
-	string choices[OPTIONS_AMOUNT] = { "Width:   " + to_string(width) + "    ", "Height:   " + to_string(height) + "    ", "Speed:   " + to_string(delay) + "    ", "Walls: " + to_string(gamemode) + "    ", "Exit   " };
+	string choices[OPTIONS_AMOUNT] = { "Szerokosc planszy:   " + to_string(width) + "    ", "Wysokosc planszy:   " + to_string(height) + "    ", " ", gamemode ? "Sciany wylaczone    " : "Sciany wlaczone    ", "Cofnij   " };
+	choices[2] = getGameSpeed();
 	string toPrint = "";
 	toPrint = "\n";
 	for (int i = 0; i < OPTIONS_AMOUNT; i++)
@@ -398,7 +482,7 @@ int useMenuOption(int i)
 
 void showMenu(int menuCursor)
 {
-	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Start Game   ", "Highscores   ", "Options   ", "Exit   " };
+	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
 	string toPrint = "";
 	toPrint = "\n";
 	for (int i = 0; i < MAIN_MENU_OPTIONS_AMOUNT; i++)
@@ -497,7 +581,7 @@ void showHighscores()
 		i++;
 	}
 	file.close();
-	cout << endl << "   >Press any button";
+	cout << endl << "   >Nacisnij przycisk";
 	_getch();
 	system("cls");
 	//runMenu();
@@ -505,5 +589,6 @@ void showHighscores()
 
 void mainMenu()
 {
+	setTerminalWindow();
 	runMenu();
 }
