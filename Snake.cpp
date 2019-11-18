@@ -8,9 +8,17 @@
 #include <fstream>
 
 
-const char MOVE_MENU_CURSOR_UP = 'w';
-const char MOVE_MENU_CURSOR_DOWN = 's';
-const char MOVE_MENU_CURSOR_ACCEPT = 'f';
+const char KEY_UP = 'w';
+const char KEY_DOWN = 's';
+const char KEY_LEFT = 'a';
+const char KEY_RIGHT = 'd';
+const char KEY_ACCEPT = 'f';
+const char KEY_UP2 = 72;
+const char KEY_DOWN2 = 80;
+const char KEY_LEFT2 = 75;
+const char KEY_RIGHT2 = 77;
+const char KEY_ACCEPT2 = 13;
+
 const int QUIT = -1;
 const int MAIN_MENU_OPTIONS_AMOUNT = 4;
 const int OPTIONS_AMOUNT = 5;
@@ -128,28 +136,28 @@ bool makeMove(int ch, char **map, int *x, int *y, int snakeSize)
 {
 	switch (ch)
 	{
-	case 'a':
+	case KEY_LEFT:
 		if (x[0] == 0)
 		{
 			return gamemode ? moveSnake(map, x, y, width - 1, y[0], 0, snakeSize) : 0;
 		}
 		else moveSnake(map, x, y, x[0] - 1, y[0], 0, snakeSize);
 		break;
-	case 'd':
+	case KEY_RIGHT:
 		if (x[0] == width - 1)
 		{
 			return gamemode ? moveSnake(map, x, y, 0, y[0], 0, snakeSize) : 0;
 		}
 		else moveSnake(map, x, y, x[0] + 1, y[0], 0, snakeSize);
 		break;
-	case 'w':
+	case KEY_UP:
 		if (y[0] == 0)
 		{
 			return gamemode ? moveSnake(map, x, y, x[0], height - 1, 0, snakeSize) : 0;
 		}
 		else moveSnake(map, x, y, x[0], y[0] - 1, 0, snakeSize);
 		break;
-	case 's':
+	case KEY_DOWN:
 		if (y[0] == height - 1)
 		{
 			return gamemode ? moveSnake(map, x, y, x[0], 0, 0, snakeSize) : 0;
@@ -285,12 +293,24 @@ int playGame()
 			char key = _getch();
 			switch (direction)
 			{
-			case 'd': if (key == 'a') key = 'd'; break;
-			case 'a': if (key == 'd') key = 'a'; break;
-			case 'w': if (key == 's') key = 'w'; break;
-			case 's': if (key == 'w') key = 's'; break;
+			case KEY_RIGHT: if (key == KEY_LEFT || key == KEY_LEFT2 || tolower(key) == KEY_LEFT) key = KEY_RIGHT; break;
+			case KEY_LEFT: if (key == KEY_RIGHT || key == KEY_RIGHT2 || tolower(key) == KEY_RIGHT) key = KEY_LEFT; break;
+			case KEY_UP: if (key == KEY_DOWN || key == KEY_DOWN2 || tolower(key) == KEY_DOWN) key = KEY_UP; break;
+			case KEY_DOWN: if (key == KEY_UP || key == KEY_UP2 || tolower(key) == KEY_UP) key = KEY_DOWN; break;
 			}
-			if (key == 'a' || key == 's' || key == 'd' || key == 'w' || key == 27)
+			if (key == KEY_LEFT2 || key == KEY_DOWN2 || key == KEY_RIGHT2 || key == KEY_UP2 || key == 27)
+			{
+				direction = key;
+			}
+			switch (key)
+			{
+			case KEY_LEFT2: direction = KEY_LEFT; break;
+			case KEY_RIGHT2: direction = KEY_RIGHT; break;
+			case KEY_UP2: direction = KEY_UP; break;
+			case KEY_DOWN2: direction = KEY_DOWN; break;
+			}
+			key = tolower(key);
+			if (key == KEY_LEFT || key == KEY_DOWN || key == KEY_RIGHT || key == KEY_UP || key == 27)
 			{
 				direction = key;
 			}
@@ -308,10 +328,19 @@ int playGame()
 	return score;
 }
 
+string getNick()
+{
+	string nick;
+	cout << "Podaj imie:\n";
+	cin >> nick;
+	system("cls");
+	return nick;
+}
+
 void createGame()
 {
 	clear();
-	saveScore("test", playGame());
+	saveScore(getNick(), playGame());
 }
 
 void exit()
@@ -355,9 +384,16 @@ int manageSpeedMenu(int menuCursor)
 	char key = _getch();
 	switch (key)
 	{
-	case MOVE_MENU_CURSOR_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_ACCEPT: return -speedOption(menuCursor);
+	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case KEY_ACCEPT2: return -speedOption(menuCursor);	
+	}
+	key = tolower(key);
+	switch (key)
+	{
+	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case KEY_ACCEPT: return -speedOption(menuCursor);
 	}
 	return menuCursor;
 }
@@ -419,9 +455,16 @@ int manageOptions(int menuCursor)
 	char key = _getch();
 	switch (key)
 	{
-	case MOVE_MENU_CURSOR_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_ACCEPT: return changeOption(menuCursor);
+	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case KEY_ACCEPT2: return changeOption(menuCursor);
+	}
+	key = tolower(key);
+	switch (key)
+	{
+	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case KEY_ACCEPT: return changeOption(menuCursor);
 	}
 	return menuCursor;
 }
@@ -516,9 +559,16 @@ int manageMenu(int menuCursor)
 	char key = _getch();
 	switch (key)
 	{
-	case MOVE_MENU_CURSOR_DOWN: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_UP: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case MOVE_MENU_CURSOR_ACCEPT: return useMenuOption(menuCursor);;
+	case KEY_DOWN2: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_UP2: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_ACCEPT2: return useMenuOption(menuCursor);
+	}
+	key = tolower(key);
+	switch (key)
+	{
+	case KEY_DOWN: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_UP: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_ACCEPT: return useMenuOption(menuCursor);
 	}
 	return menuCursor;
 }
@@ -584,7 +634,6 @@ void showHighscores()
 	cout << endl << "   >Nacisnij przycisk";
 	_getch();
 	system("cls");
-	//runMenu();
 }
 
 void mainMenu()
