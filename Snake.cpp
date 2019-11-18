@@ -122,16 +122,14 @@ bool moveSnake(char **map, int *x, int *y, int x_dest, int y_dest, int snakePosi
 {
 	int x_old = x[snakePosition];
 	int y_old = y[snakePosition];
-	map[x_old][y_old] = ' ';
 	x[snakePosition] = x_dest;
 	y[snakePosition] = y_dest;
-	map[x[snakePosition]][y[snakePosition]] = '#';
-
+	map[x[snakePosition]][y[snakePosition]] = snakePosition? '#':'O';
 	if (snakePosition != snakeSize)
 	{
 		moveSnake(map, x, y, x_old, y_old, snakePosition + 1, snakeSize);
 	}
-
+	else map[x_old][y_old] = map[x_old][y_old] == 'O'? 'O':' ';
 	return 1;
 }
 
@@ -276,7 +274,7 @@ int playGame()
 	int score = 0;
 	char **map = createMap();
 	fill(map);
-	int snakeSize = 3;
+	int snakeSize = 10;
 	system("cls");
 	SNAKE snake = createSnake(snakeSize);
 	snake = extendSnake(snake, &snakeSize);
@@ -319,7 +317,7 @@ int playGame()
 				direction = key;
 			}
 		}
-		stan = makeMove(direction, map, snake.x, snake.y, snakeSize - 1) && checkCollision(snake.x[0], snake.y[0], snake.x, snake.y, snakeSize);
+		stan = makeMove(direction, map, snake.x, snake.y, snakeSize - 2) && checkCollision(snake.x[0], snake.y[0], snake.x, snake.y, snakeSize - 1);
 		if (checkForPoint(snake.x[0], snake.y[0], appleX, appleY, &score))
 		{
 			createApple(&appleX, &appleY, map); snake = extendSnake(snake, &snakeSize);
