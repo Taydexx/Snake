@@ -43,7 +43,7 @@ SNAKE extendSnake(SNAKE snake, int *snakeSize);
 char **createMap();
 bool checkForPoint(int destX, int destY, int x, int y, int *score);
 void createApple(int *x, int *y, char **map);
-void setTerminalWindow();
+void setTerminalWindow(int width, int height);
 int playGame();
 void showOptions(int menuCursor);
 void runOptions();
@@ -60,10 +60,11 @@ void mainMenu();
 int moveCursorDown(int menuCursor, int length);
 int moveCursorUp(int menuCursor, int length);
 
-int width = 60;
-int height = 40;
-int delay = 20;
-bool gamemode = 0;
+int width = 30;
+int height = 20;
+int delay = 40;
+bool gamemode = 1;
+time_t startTime;
 
 int main()
 {
@@ -84,9 +85,11 @@ void fill(char **array)
 
 void show(char **array, int score)
 {
-	string toPrint = "Score: ";
+	string toPrint = "Punkty: ";
 	toPrint += to_string(score);
-	toPrint += "\n";
+	toPrint += "    Czas:  ";
+	toPrint += to_string(time(NULL) - startTime);
+	toPrint += "s\n";
 	for (int i = -3; i < width + 3; i++)
 	{
 		toPrint += "!";
@@ -201,8 +204,8 @@ SNAKE createSnake(int snakeSize)
 	SNAKE snake;
 	for (int i = 0; i < snakeSize; i++)
 	{
-		x[i] = 3;
-		y[i] = 5;
+		x[i] = width/2;
+		y[i] = height/2;
 	}
 	snake.x = x;
 	snake.y = y;
@@ -239,7 +242,7 @@ bool checkForPoint(int destX, int destY, int x, int y, int *score)
 {
 	if (destX == x && destY == y)
 	{
-		*score += 1000;
+		*score +=1;
 		return 1;
 	}
 	return 0;
@@ -247,34 +250,34 @@ bool checkForPoint(int destX, int destY, int x, int y, int *score)
 
 void createApple(int *x, int *y, char **map)
 {
-	int celX = rand() % height;
-	int celY = rand() % width;
-	while (map[celX][celY] != ' ')
+	int celX, celY;
+	do
 	{
-		celX = rand() % height;
-		celY = rand() % width;
-	}
+		celX = rand() % width;
+		celY = rand() % height;
+	} while (map[celX][celY] != ' ');
 	map[celX][celY] = '0';
 	*x = celX;
 	*y = celY;
 }
 
-void setTerminalWindow()
+void setTerminalWindow(int width, int height)
 {
 	HWND console = GetConsoleWindow();
 	RECT r;
 	GetWindowRect(console, &r);
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	MoveWindow(console, r.left, r.top, width * 10 + 4, (height + 4) * 18, TRUE);
+	MoveWindow(console, r.left, r.top, (width + 6) * 12, (height + 5) * 20, TRUE);
 }
 
 int playGame()
 {
-	setTerminalWindow();
+	setTerminalWindow(width, height);
 	int score = 0;
 	char **map = createMap();
 	fill(map);
 	int snakeSize = 3;
+	system("cls");
 	SNAKE snake = createSnake(snakeSize);
 	snake = extendSnake(snake, &snakeSize);
 	int *x = snake.x;
@@ -284,6 +287,7 @@ int playGame()
 	int appleX;
 	int appleY;
 	createApple(&appleX, &appleY, map);
+	startTime = time(NULL);
 	while (stan)
 	{
 		clear();
@@ -321,10 +325,10 @@ int playGame()
 			createApple(&appleX, &appleY, map); snake = extendSnake(snake, &snakeSize);
 		}
 		Sleep(delay);
-		score++;
 	}
 	deletePointers(map, snake.x, snake.y);
 	system("cls");
+	setTerminalWindow(60, 20);
 	return score;
 }
 
@@ -353,14 +357,14 @@ int setIntValue()
 	int value;
 	int buff;
 	system("cls");
-	cout << "Podaj wartosc: \n";
+	cout << "Podaj wartosc (minimalna wartosc 8) \n";
 	cin >> buff;
-	while (cin.fail())
+	while (cin.fail() || buff <8)
 	{
 		cin.clear();
 		system("cls");
 		while (cin.get() != '\n') continue;
-		cout << "Prosze podac prawidlowa wartosc: \n";
+		cout << "Prosze podac prawidlowa wartosc (minimalna wartosc 8) \n";
 		cin >> buff;
 	} 
 	system("cls");
@@ -576,6 +580,7 @@ int manageMenu(int menuCursor)
 void runMenu()
 {
 	system("cls");
+	setTerminalWindow(60, 20);
 	int menuCursor = 0;
 	string toPrint = "";
 	do
@@ -617,6 +622,25 @@ void saveScore(string nick, int score)
 	file << toSave;
 }
 
+void loadOptions()
+{
+	fstream file;
+	file.open("options.txt");
+	file >> height;
+	file >> width;
+	file >> delay;
+	file >> gamemode;
+	file.close();
+}
+
+void saveOptions()
+{
+	fstream file;
+	file.open("options.txt", fstream::out);
+	file << height << endl<< width << endl << delay << endl << gamemode;
+	file.close();
+}
+
 void showHighscores()
 {
 	system("cls");
@@ -638,6 +662,7 @@ void showHighscores()
 
 void mainMenu()
 {
-	setTerminalWindow();
+	loadOptions();
 	runMenu();
+	saveOptions();
 }
