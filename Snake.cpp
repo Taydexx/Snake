@@ -13,6 +13,7 @@ const char KEY_DOWN = 's';
 const char KEY_LEFT = 'a';
 const char KEY_RIGHT = 'd';
 const char KEY_ACCEPT = 'f';
+
 const char KEY_UP2 = 72;
 const char KEY_DOWN2 = 80;
 const char KEY_LEFT2 = 75;
@@ -31,7 +32,11 @@ struct SNAKE
 	int *y;
 };
 
+
+int manageMenu(int optionsAmount, int menuCursor, int(*functionHandler)(int));
+
 void setTerminalWindow(int width, int height);
+char **createMap();
 void fill(char **array);
 void show(char **array, int score);
 void clear();
@@ -40,7 +45,6 @@ bool makeMove(int ch, char **map, int *x, int *y, int snakeSize);
 void deletePointers(char **map, int *x, int *y);
 SNAKE createSnake(int snakeSize);
 SNAKE extendSnake(SNAKE snake, int *snakeSize);
-char **createMap();
 bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize);
 bool checkForPoint(int destX, int destY, int x, int y, int *score);
 void createApple(int *x, int *y, char **map);
@@ -58,11 +62,11 @@ int useMenuOption(int i);
 void showMenu(int menuCursor);
 int manageMenu(int menuCursor);
 void runMenu();
-int useOption(int menuCursor);
+int selectOption(int menuCursor);
 void showOptions(int menuCursor);
 void runOptions();
 string getGameSpeed();
-int speedOption(int menuCursor);
+int selectSpeed(int menuCursor);
 int manageSpeedMenu(int menuCursor);
 void showSpeedMenu(int menuCursor);
 void mainMenu();
@@ -90,6 +94,16 @@ void setTerminalWindow(int width, int height)
 	GetWindowRect(console, &r);
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	MoveWindow(console, r.left, r.top, (width + 6) * 12, (height + 5) * 20, TRUE);
+}
+
+char **createMap()
+{
+	char **map = new char*[width];
+	for (int i = 0; i < width; i++)
+	{
+		map[i] = new char[height];
+	}
+	return map;
 }
 
 void fill(char **array)
@@ -232,16 +246,6 @@ SNAKE extendSnake(SNAKE snake, int *snakeSize)
 	newSnake.x[*snakeSize - 1] = snake.x[*snakeSize - 2];
 	newSnake.y[*snakeSize - 1] = snake.y[*snakeSize - 2];
 	return newSnake;
-}
-
-char **createMap()
-{
-	char **map = new char*[width];
-	for (int i = 0; i < width; i++)
-	{
-		map[i] = new char[height];
-	}
-	return map;
 }
 
 bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize)
@@ -389,7 +393,7 @@ int setGameSpeed()
 	do
 	{
 		showSpeedMenu(menuCursor);
-		menuCursor = manageSpeedMenu(menuCursor);
+		menuCursor = manageMenu(3, menuCursor, selectSpeed);
 		clear();
 	} while (menuCursor >= 0);
 	return -menuCursor;
@@ -443,26 +447,6 @@ int useMenuOption(int i)
 	return 0;
 }
 
-int manageMenu(int menuCursor)
-{
-
-	char key = _getch();
-	switch (key)
-	{
-	case KEY_DOWN2: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_UP2: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_ACCEPT2: return useMenuOption(menuCursor);
-	}
-	key = tolower(key);
-	switch (key)
-	{
-	case KEY_DOWN: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_UP: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_ACCEPT: return useMenuOption(menuCursor);
-	}
-	return menuCursor;
-}
-
 void showMenu(int menuCursor)
 {
 	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
@@ -490,12 +474,12 @@ void runMenu()
 	do
 	{
 		showMenu(menuCursor);
-		menuCursor = manageMenu(menuCursor);
+		menuCursor = manageMenu(MAIN_MENU_OPTIONS_AMOUNT, menuCursor, useMenuOption);
 		clear();
 	} while (menuCursor >= 0);
 }
 
-int useOption(int menuCursor)
+int selectOption(int menuCursor)
 {
 	switch (menuCursor)
 	{
@@ -506,25 +490,6 @@ int useOption(int menuCursor)
 	case 4: exit(); return QUIT;
 	}
 	return 0;
-}
-
-int manageOptions(int menuCursor)
-{
-	char key = _getch();
-	switch (key)
-	{
-	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT2: return useOption(menuCursor);
-	}
-	key = tolower(key);
-	switch (key)
-	{
-	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT: return useOption(menuCursor);
-	}
-	return menuCursor;
 }
 
 void showOptions(int menuCursor)
@@ -554,7 +519,7 @@ void runOptions()
 	do
 	{
 		showOptions(menuCursor);
-		menuCursor = manageOptions(menuCursor);
+		menuCursor = manageMenu(OPTIONS_AMOUNT, menuCursor, selectOption);
 		clear();
 	} while (menuCursor >= 0);
 }
@@ -569,32 +534,32 @@ string getGameSpeed()
 	return "Predkosc gry: szybka    ";
 }
 
-int speedOption(int menuCursor)
+int selectSpeed(int menuCursor)
 {
 	switch (menuCursor)
 	{
-	case 0: return 80; break;
-	case 1: return 40; break;
-	case 2:	return 20; break;
+	case 0: return -80; break;
+	case 1: return -40; break;
+	case 2:	return -20; break;
 	}
-	return 40;
+	return -40;
 }
 
-int manageSpeedMenu(int menuCursor)
+int manageMenu(int optionsAmount, int menuCursor, int(*functionHandler)(int))
 {
 	char key = _getch();
 	switch (key)
 	{
-	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT2: return -speedOption(menuCursor);
+	case KEY_DOWN2: return moveCursorDown(menuCursor, optionsAmount);
+	case KEY_UP2: return moveCursorUp(menuCursor, optionsAmount);
+	case KEY_ACCEPT2: return functionHandler(menuCursor);
 	}
 	key = tolower(key);
 	switch (key)
 	{
-	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT: return -speedOption(menuCursor);
+	case KEY_DOWN: return moveCursorDown(menuCursor, optionsAmount);
+	case KEY_UP: return moveCursorUp(menuCursor, optionsAmount);
+	case KEY_ACCEPT: return functionHandler(menuCursor);
 	}
 	return menuCursor;
 }
