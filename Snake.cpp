@@ -31,34 +31,45 @@ struct SNAKE
 	int *y;
 };
 
+void setTerminalWindow(int width, int height);
 void fill(char **array);
 void show(char **array, int score);
 void clear();
 bool moveSnake(char **map, int *x, int *y, int x_dest, int y_dest, int snakePosition, int snakeSize);
 bool makeMove(int ch, char **map, int *x, int *y, int snakeSize);
 void deletePointers(char **map, int *x, int *y);
-bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize);
 SNAKE createSnake(int snakeSize);
 SNAKE extendSnake(SNAKE snake, int *snakeSize);
 char **createMap();
+bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize);
 bool checkForPoint(int destX, int destY, int x, int y, int *score);
 void createApple(int *x, int *y, char **map);
-void setTerminalWindow(int width, int height);
 int playGame();
-void showOptions(int menuCursor);
-void runOptions();
 void createGame();
-void mainMenu();
-void saveScore(string nick, int score);
+string getNick();
 void exit();
+int setIntValue();
+int setGameSpeed();
+bool changeGamemode();
+void showHighscores();
+int moveCursorDown(int menuCursor, int length);
+int moveCursorUp(int menuCursor, int length);
 int useMenuOption(int i);
 void showMenu(int menuCursor);
 int manageMenu(int menuCursor);
 void runMenu();
-void showHighscores();
+int useOption(int menuCursor);
+void showOptions(int menuCursor);
+void runOptions();
+string getGameSpeed();
+int speedOption(int menuCursor);
+int manageSpeedMenu(int menuCursor);
+void showSpeedMenu(int menuCursor);
 void mainMenu();
-int moveCursorDown(int menuCursor, int length);
-int moveCursorUp(int menuCursor, int length);
+void saveScore(string nick, int score);
+void loadOptions();
+void saveOptions();
+void mainMenu();
 
 int width = 30;
 int height = 20;
@@ -70,6 +81,15 @@ int main()
 {
 	mainMenu();
 	return 0;
+}
+
+void setTerminalWindow(int width, int height)
+{
+	HWND console = GetConsoleWindow();
+	RECT r;
+	GetWindowRect(console, &r);
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	MoveWindow(console, r.left, r.top, (width + 6) * 12, (height + 5) * 20, TRUE);
 }
 
 void fill(char **array)
@@ -182,18 +202,6 @@ void deletePointers(char **map, int *x, int *y)
 	delete[] y;
 }
 
-bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize)
-{
-	for (int i = 1; i < snakeSize; i++)
-	{
-		if (colX == x[i] && colY == y[i])
-		{
-			return 0;
-		}
-	}
-	return 1;
-}
-
 SNAKE createSnake(int snakeSize)
 {
 	int *x = new int[snakeSize];
@@ -236,6 +244,18 @@ char **createMap()
 	return map;
 }
 
+bool checkCollision(int colX, int colY, int *x, int *y, int snakeSize)
+{
+	for (int i = 1; i < snakeSize; i++)
+	{
+		if (colX == x[i] && colY == y[i])
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
 bool checkForPoint(int destX, int destY, int x, int y, int *score)
 {
 	if (destX == x && destY == y)
@@ -257,15 +277,6 @@ void createApple(int *x, int *y, char **map)
 	map[celX][celY] = '0';
 	*x = celX;
 	*y = celY;
-}
-
-void setTerminalWindow(int width, int height)
-{
-	HWND console = GetConsoleWindow();
-	RECT r;
-	GetWindowRect(console, &r);
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	MoveWindow(console, r.left, r.top, (width + 6) * 12, (height + 5) * 20, TRUE);
 }
 
 int playGame()
@@ -330,6 +341,12 @@ int playGame()
 	return score;
 }
 
+void createGame()
+{
+	clear();
+	saveScore(getNick(), playGame());
+}
+
 string getNick()
 {
 	string nick;
@@ -337,12 +354,6 @@ string getNick()
 	cin >> nick;
 	system("cls");
 	return nick;
-}
-
-void createGame()
-{
-	clear();
-	saveScore(getNick(), playGame());
 }
 
 void exit()
@@ -370,54 +381,6 @@ int setIntValue()
 	return value;
 }
 
-int speedOption(int menuCursor)
-{
-	switch (menuCursor)
-	{
-	case 0: return 80; break;
-	case 1: return 40; break;
-	case 2:	return 20; break;
-	}
-	return 40;
-}
-
-int manageSpeedMenu(int menuCursor)
-{
-	char key = _getch();
-	switch (key)
-	{
-	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT2: return -speedOption(menuCursor);	
-	}
-	key = tolower(key);
-	switch (key)
-	{
-	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
-	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT: return -speedOption(menuCursor);
-	}
-	return menuCursor;
-}
-
-void showSpeedMenu(int menuCursor)
-{
-	string choices[3] = { "Wolno   ", "Standardowo   ", "Szybko   "};
-	string toPrint = "Wybierz predkosc rozgrywki\n";
-	toPrint = "\n";
-	for (int i = 0; i < 3; i++)
-	{
-		toPrint += "  ";
-		if (i == menuCursor)
-		{
-			toPrint += " >";
-		}
-		toPrint += choices[i];
-		toPrint += "\n";
-	}
-	cout << toPrint;
-}
-
 int setGameSpeed()
 {
 	system("cls");
@@ -437,9 +400,102 @@ bool changeGamemode()
 	return !gamemode;
 }
 
+void showHighscores()
+{
+	system("cls");
+	ifstream file;
+	file.open("highscores.txt");
+	int i = 1;
+	string nick;
+	int score;
+	while (file >> nick && file >> score && i <= 10)
+	{
+		cout << i << " " << nick << "   " << score << endl;
+		i++;
+	}
+	file.close();
+	cout << endl << "   >Nacisnij przycisk";
+	_getch();
+	system("cls");
+}
 
+int moveCursorDown(int menuCursor, int length)
+{
+	menuCursor == (length - 1) ? menuCursor = 0 : menuCursor++;
+	return menuCursor;
+}
 
-int changeOption(int menuCursor)
+int moveCursorUp(int menuCursor, int length)
+{
+	menuCursor == 0 ? menuCursor = (length - 1) : menuCursor--;
+	return menuCursor;
+}
+
+int useMenuOption(int i)
+{
+	switch (i)
+	{
+	case 0: createGame(); break;
+	case 1: showHighscores(); break;
+	case 2: runOptions(); break;
+	case 3: exit(); return QUIT; break;
+	}
+	return 0;
+}
+
+int manageMenu(int menuCursor)
+{
+
+	char key = _getch();
+	switch (key)
+	{
+	case KEY_DOWN2: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_UP2: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_ACCEPT2: return useMenuOption(menuCursor);
+	}
+	key = tolower(key);
+	switch (key)
+	{
+	case KEY_DOWN: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_UP: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
+	case KEY_ACCEPT: return useMenuOption(menuCursor);
+	}
+	return menuCursor;
+}
+
+void showMenu(int menuCursor)
+{
+	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
+	string toPrint = "";
+	toPrint = "\n";
+	for (int i = 0; i < MAIN_MENU_OPTIONS_AMOUNT; i++)
+	{
+		toPrint += "  ";
+		if (i == menuCursor)
+		{
+			toPrint += " >";
+		}
+		toPrint += choices[i];
+		toPrint += "\n";
+	}
+	cout << toPrint;
+}
+
+void runMenu()
+{
+	system("cls");
+	setTerminalWindow(60, 20);
+	int menuCursor = 0;
+	string toPrint = "";
+	do
+	{
+		showMenu(menuCursor);
+		menuCursor = manageMenu(menuCursor);
+		clear();
+	} while (menuCursor >= 0);
+}
+
+int useOption(int menuCursor)
 {
 	switch (menuCursor)
 	{
@@ -459,26 +515,16 @@ int manageOptions(int menuCursor)
 	{
 	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
 	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT2: return changeOption(menuCursor);
+	case KEY_ACCEPT2: return useOption(menuCursor);
 	}
 	key = tolower(key);
 	switch (key)
 	{
 	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
 	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
-	case KEY_ACCEPT: return changeOption(menuCursor);
+	case KEY_ACCEPT: return useOption(menuCursor);
 	}
 	return menuCursor;
-}
-
-string getGameSpeed()
-{
-	switch (delay)
-	{
-	case 80: return "Predkosc gry: wolna    "; break;
-	case 40: return "Predkosc gry: standardowa    "; break;
-	}
-	return "Predkosc gry: szybka    ";
 }
 
 void showOptions(int menuCursor)
@@ -513,24 +559,52 @@ void runOptions()
 	} while (menuCursor >= 0);
 }
 
-int useMenuOption(int i)
+string getGameSpeed()
 {
-	switch (i)
+	switch (delay)
 	{
-	case 0: createGame(); break;
-	case 1: showHighscores(); break;
-	case 2: runOptions(); break;
-	case 3: exit(); return QUIT; break;
+	case 80: return "Predkosc gry: wolna    "; break;
+	case 40: return "Predkosc gry: standardowa    "; break;
 	}
-	return 0;
+	return "Predkosc gry: szybka    ";
 }
 
-void showMenu(int menuCursor)
+int speedOption(int menuCursor)
 {
-	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
-	string toPrint = "";
+	switch (menuCursor)
+	{
+	case 0: return 80; break;
+	case 1: return 40; break;
+	case 2:	return 20; break;
+	}
+	return 40;
+}
+
+int manageSpeedMenu(int menuCursor)
+{
+	char key = _getch();
+	switch (key)
+	{
+	case KEY_DOWN2: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case KEY_UP2: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case KEY_ACCEPT2: return -speedOption(menuCursor);
+	}
+	key = tolower(key);
+	switch (key)
+	{
+	case KEY_DOWN: return moveCursorDown(menuCursor, OPTIONS_AMOUNT);
+	case KEY_UP: return moveCursorUp(menuCursor, OPTIONS_AMOUNT);
+	case KEY_ACCEPT: return -speedOption(menuCursor);
+	}
+	return menuCursor;
+}
+
+void showSpeedMenu(int menuCursor)
+{
+	string choices[3] = { "Wolno   ", "Standardowo   ", "Szybko   " };
+	string toPrint = "Wybierz predkosc rozgrywki\n";
 	toPrint = "\n";
-	for (int i = 0; i < MAIN_MENU_OPTIONS_AMOUNT; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		toPrint += "  ";
 		if (i == menuCursor)
@@ -541,52 +615,6 @@ void showMenu(int menuCursor)
 		toPrint += "\n";
 	}
 	cout << toPrint;
-}
-
-int moveCursorDown(int menuCursor, int length)
-{
-	menuCursor == (length - 1) ? menuCursor = 0 : menuCursor++;
-	return menuCursor;
-}
-
-int moveCursorUp(int menuCursor, int length)
-{
-	menuCursor == 0 ? menuCursor = (length - 1) : menuCursor--;
-	return menuCursor;
-}
-
-int manageMenu(int menuCursor)
-{
-
-	char key = _getch();
-	switch (key)
-	{
-	case KEY_DOWN2: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_UP2: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_ACCEPT2: return useMenuOption(menuCursor);
-	}
-	key = tolower(key);
-	switch (key)
-	{
-	case KEY_DOWN: return moveCursorDown(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_UP: return moveCursorUp(menuCursor, MAIN_MENU_OPTIONS_AMOUNT);
-	case KEY_ACCEPT: return useMenuOption(menuCursor);
-	}
-	return menuCursor;
-}
-
-void runMenu()
-{
-	system("cls");
-	setTerminalWindow(60, 20);
-	int menuCursor = 0;
-	string toPrint = "";
-	do
-	{
-		showMenu(menuCursor);
-		menuCursor = manageMenu(menuCursor);
-		clear();
-	} while (menuCursor >= 0);
 }
 
 void saveScore(string nick, int score)
@@ -637,25 +665,6 @@ void saveOptions()
 	file.open("options.txt", fstream::out);
 	file << height << endl<< width << endl << delay << endl << gamemode;
 	file.close();
-}
-
-void showHighscores()
-{
-	system("cls");
-	ifstream file;
-	file.open("highscores.txt");
-	int i = 1;
-	string nick;
-	int score;
-	while (file >> nick && file >> score && i <= 10)
-	{
-		cout << i << " " << nick << "   " << score << endl;
-		i++;
-	}
-	file.close();
-	cout << endl << "   >Nacisnij przycisk";
-	_getch();
-	system("cls");
 }
 
 void mainMenu()
