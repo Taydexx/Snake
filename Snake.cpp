@@ -489,7 +489,7 @@ int selectOption(int menuCursor)
 	case 3: gamemode = changeGamemode(); break;
 	case 4: exit(); return QUIT;
 	}
-	return 0;
+	return menuCursor;
 }
 
 void showOptions(int menuCursor)
@@ -587,20 +587,20 @@ void saveScore(string nick, int score)
 	fstream file;
 	file.open("highscores.txt");
 	int i = 0;
-	string sNick;
-	int sScore;
+	string nickBuffer;
+	int scoreBuffer;
 	string toSave = "";
-	while (file >> sNick && file >> sScore)
+	while (file >> nickBuffer && file >> scoreBuffer)
 	{
-		if (score >= sScore)
+		if (score >= scoreBuffer)
 		{
 			toSave += nick + "\n" + to_string(score) + "\n";
-			score = sScore;
-			nick = sNick;
+			score = scoreBuffer;
+			nick = nickBuffer;
 		}
 		else
 		{
-			toSave += sNick + "\n" + to_string(sScore) + "\n";
+			toSave += nickBuffer + "\n" + to_string(scoreBuffer) + "\n";
 		}
 		i++;
 	}
