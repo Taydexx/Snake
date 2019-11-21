@@ -59,7 +59,7 @@ void showHighscores();
 int moveCursorDown(int menuCursor, int length);
 int moveCursorUp(int menuCursor, int length);
 int useMenuOption(int i);
-void showMenu(int menuCursor);
+void showMenuLegacy(int menuCursor);
 int manageMenu(int menuCursor);
 void runMenu();
 int selectOption(int menuCursor);
@@ -447,7 +447,22 @@ int useMenuOption(int i)
 	return 0;
 }
 
-void showMenu(int menuCursor)
+void showMenu(string choices[], int choicesAmount, string toPrint, int menuCursor)
+{
+	for (int i = 0; i < choicesAmount, i++)
+	{
+		toPrint += "  ";
+		if (i == menuCursor)
+		{
+			toPrint += " >";
+		}
+		toPrint += choices[i];
+		toPrint += "\n";
+	}
+	cout << toPrint;
+}
+
+void showMenuLegacy(int menuCursor)
 {
 	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
 	string toPrint = "";
@@ -473,7 +488,7 @@ void runMenu()
 	string toPrint = "";
 	do
 	{
-		showMenu(menuCursor);
+		showMenuLegacy(menuCursor);
 		menuCursor = manageMenu(MAIN_MENU_OPTIONS_AMOUNT, menuCursor, useMenuOption);
 		clear();
 	} while (menuCursor >= 0);
