@@ -21,7 +21,7 @@ const char KEY_RIGHT2 = 77;
 const char KEY_ACCEPT2 = 13;
 
 const int QUIT = -1;
-const int MAIN_MENU_OPTIONS_AMOUNT = 4;
+const int MAIN_MENU_OPTIONS_AMOUNT = 3;
 const int OPTIONS_AMOUNT = 5;
 
 using namespace std;
@@ -34,7 +34,7 @@ struct SNAKE
 
 
 int manageMenu(int optionsAmount, int menuCursor, int(*functionHandler)(int));
-
+void showMenu(string choices[], int choicesAmount, string toPrint, int menuCursor);
 void setTerminalWindow(int width, int height);
 char **createMap();
 void fill(char **array);
@@ -60,14 +60,12 @@ int moveCursorDown(int menuCursor, int length);
 int moveCursorUp(int menuCursor, int length);
 int useMenuOption(int i);
 void showMenuLegacy(int menuCursor);
-int manageMenu(int menuCursor);
 void runMenu();
 int selectOption(int menuCursor);
 void showOptions(int menuCursor);
 void runOptions();
 string getGameSpeed();
 int selectSpeed(int menuCursor);
-int manageSpeedMenu(int menuCursor);
 void showSpeedMenu(int menuCursor);
 void mainMenu();
 void saveScore(string nick, int score);
@@ -347,6 +345,7 @@ int playGame()
 
 void createGame()
 {
+	runOptions();
 	clear();
 	saveScore(getNick(), playGame());
 }
@@ -389,10 +388,12 @@ int setGameSpeed()
 {
 	system("cls");
 	int menuCursor = 0;
-	string toPrint = "";
+	string choices[3] = { "Wolno   ", "Standardowo   ", "Szybko   " };
+	string toPrint = "Wybierz predkosc rozgrywki\n";
+	toPrint = "\n";
 	do
 	{
-		showSpeedMenu(menuCursor);
+		showMenu(choices, 3,toPrint, menuCursor);
 		menuCursor = manageMenu(3, menuCursor, selectSpeed);
 		clear();
 	} while (menuCursor >= 0);
@@ -441,15 +442,15 @@ int useMenuOption(int i)
 	{
 	case 0: createGame(); break;
 	case 1: showHighscores(); break;
-	case 2: runOptions(); break;
-	case 3: exit(); return QUIT; break;
+	//case 2: runOptions(); break;
+	case 2: exit(); return QUIT; break;
 	}
 	return 0;
 }
 
 void showMenu(string choices[], int choicesAmount, string toPrint, int menuCursor)
 {
-	for (int i = 0; i < choicesAmount, i++)
+	for (int i = 0; i < choicesAmount; i++)
 	{
 		toPrint += "  ";
 		if (i == menuCursor)
@@ -462,7 +463,7 @@ void showMenu(string choices[], int choicesAmount, string toPrint, int menuCurso
 	cout << toPrint;
 }
 
-void showMenuLegacy(int menuCursor)
+/*void showMenuLegacy(int menuCursor)
 {
 	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
 	string toPrint = "";
@@ -479,16 +480,17 @@ void showMenuLegacy(int menuCursor)
 	}
 	cout << toPrint;
 }
-
+*/
 void runMenu()
 {
 	system("cls");
 	setTerminalWindow(60, 20);
 	int menuCursor = 0;
-	string toPrint = "";
+	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Wyjscie   " };
+	string toPrint = "\n";
 	do
 	{
-		showMenuLegacy(menuCursor);
+		showMenu(choices, MAIN_MENU_OPTIONS_AMOUNT, toPrint, menuCursor);
 		menuCursor = manageMenu(MAIN_MENU_OPTIONS_AMOUNT, menuCursor, useMenuOption);
 		clear();
 	} while (menuCursor >= 0);
@@ -507,10 +509,9 @@ int selectOption(int menuCursor)
 	return menuCursor;
 }
 
-void showOptions(int menuCursor)
+/*void showOptions(int menuCursor)
 {
-	string choices[OPTIONS_AMOUNT] = { "Szerokosc planszy:   " + to_string(width) + "    ", "Wysokosc planszy:   " + to_string(height) + "    ", " ", gamemode ? "Sciany wylaczone    " : "Sciany wlaczone    ", "Cofnij   " };
-	choices[2] = getGameSpeed();
+
 	string toPrint = "";
 	toPrint = "\n";
 	for (int i = 0; i < OPTIONS_AMOUNT; i++)
@@ -524,16 +525,19 @@ void showOptions(int menuCursor)
 		toPrint += "\n";
 	}
 	cout << toPrint;
-}
+}*/
 
 void runOptions()
 {
 	system("cls");
 	int menuCursor = 0;
-	string toPrint = "";
+	string toPrint = "\n";
 	do
 	{
-		showOptions(menuCursor);
+		string choices[OPTIONS_AMOUNT] = { "Szerokosc planszy:   " + to_string(width) + "    ", "Wysokosc planszy:   " + to_string(height) + "    ", " ", gamemode ? "Sciany wylaczone    " : "Sciany wlaczone    ", "Graj   " };
+		choices[2] = getGameSpeed();
+		showMenu(choices, OPTIONS_AMOUNT, toPrint, menuCursor);
+		//showOptions(menuCursor);
 		menuCursor = manageMenu(OPTIONS_AMOUNT, menuCursor, selectOption);
 		clear();
 	} while (menuCursor >= 0);
