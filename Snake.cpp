@@ -1,12 +1,10 @@
 ﻿
 #include "pch.h"
-#include <iostream>
 #include <conio.h>
 #include <Windows.h>
-#include <string>
 #include <ctime>
 #include <fstream>
-
+#include <string>
 
 const char KEY_UP = 'w';
 const char KEY_DOWN = 's';
@@ -59,10 +57,8 @@ void showHighscores();
 int moveCursorDown(int menuCursor, int length);
 int moveCursorUp(int menuCursor, int length);
 int useMenuOption(int i);
-void showMenuLegacy(int menuCursor);
 void runMenu();
 int selectOption(int menuCursor);
-void showOptions(int menuCursor);
 void runOptions();
 string getGameSpeed();
 int selectSpeed(int menuCursor);
@@ -78,6 +74,7 @@ int height = 20;
 int delay = 40;
 bool gamemode = 1;
 time_t startTime;
+int playTime;
 
 int main()
 {
@@ -120,7 +117,8 @@ void show(char **array, int score)
 	string toPrint = "Punkty: ";
 	toPrint += to_string(score);
 	toPrint += "    Czas:  ";
-	toPrint += to_string(time(NULL) - startTime);
+	playTime = time(NULL) - startTime;
+	toPrint += to_string(playTime);
 	toPrint += "s\n";
 	for (int i = -3; i < width + 3; i++)
 	{
@@ -141,7 +139,7 @@ void show(char **array, int score)
 		toPrint += "!";
 	}
 	toPrint += "\n";
-	cout << toPrint;
+	printf("%s", toPrint.c_str());
 }
 
 void clear()
@@ -352,9 +350,10 @@ void createGame()
 
 string getNick()
 {
-	string nick;
-	cout << "Podaj imie:\n";
-	cin >> nick;
+	char charArray[16];
+	printf("Podaj imie (maksymalna dlugosc 15) \n");
+	scanf_s("%15s", charArray, (unsigned)_countof(charArray));
+	string nick = charArray;
 	system("cls");
 	return nick;
 }
@@ -369,15 +368,11 @@ int setIntValue()
 	int value;
 	int buff;
 	system("cls");
-	cout << "Podaj wartosc (minimalna wartosc 8) \n";
-	cin >> buff;
-	while (cin.fail() || buff <8)
+	printf("Podaj wartosc (minimalna wartosc 8) \n");
+	while (!scanf_s("%d", &buff) || buff <8)
 	{
-		cin.clear();
 		system("cls");
-		while (cin.get() != '\n') continue;
-		cout << "Prosze podac prawidlowa wartosc (minimalna wartosc 8) \n";
-		cin >> buff;
+		printf("Prosze podac prawidlowa wartosc (minimalna wartosc 8) \n");
 	} 
 	system("cls");
 	value = buff;
@@ -413,13 +408,15 @@ void showHighscores()
 	int i = 1;
 	string nick;
 	int score;
-	while (file >> nick && file >> score && i <= 10)
+	int time;
+	printf("\n   Nick              Punkty   Czas\n");
+	while (file >> nick && file >> score && file >> time && i <= 10)
 	{
-		cout << i << " " << nick << "   " << score << endl;
+		printf("%-2d %-15s   %6d   %4d\n", i, nick.c_str(), score, time);
 		i++;
 	}
 	file.close();
-	cout << endl << "   >Nacisnij przycisk";
+	printf("\n   >Nacisnij przycisk");
 	_getch();
 	system("cls");
 }
@@ -442,7 +439,6 @@ int useMenuOption(int i)
 	{
 	case 0: createGame(); break;
 	case 1: showHighscores(); break;
-	//case 2: runOptions(); break;
 	case 2: exit(); return QUIT; break;
 	}
 	return 0;
@@ -460,27 +456,9 @@ void showMenu(string choices[], int choicesAmount, string toPrint, int menuCurso
 		toPrint += choices[i];
 		toPrint += "\n";
 	}
-	cout << toPrint;
+	printf("%s", toPrint.c_str());
 }
 
-/*void showMenuLegacy(int menuCursor)
-{
-	string choices[MAIN_MENU_OPTIONS_AMOUNT] = { "Rozpocznij Gre   ", "Najlepsze wyniki   ", "Opcje   ", "Wyjscie   " };
-	string toPrint = "";
-	toPrint = "\n";
-	for (int i = 0; i < MAIN_MENU_OPTIONS_AMOUNT; i++)
-	{
-		toPrint += "  ";
-		if (i == menuCursor)
-		{
-			toPrint += " >";
-		}
-		toPrint += choices[i];
-		toPrint += "\n";
-	}
-	cout << toPrint;
-}
-*/
 void runMenu()
 {
 	system("cls");
@@ -509,24 +487,6 @@ int selectOption(int menuCursor)
 	return menuCursor;
 }
 
-/*void showOptions(int menuCursor)
-{
-
-	string toPrint = "";
-	toPrint = "\n";
-	for (int i = 0; i < OPTIONS_AMOUNT; i++)
-	{
-		toPrint += "  ";
-		if (i == menuCursor)
-		{
-			toPrint += " >";
-		}
-		toPrint += choices[i];
-		toPrint += "\n";
-	}
-	cout << toPrint;
-}*/
-
 void runOptions()
 {
 	system("cls");
@@ -537,7 +497,6 @@ void runOptions()
 		string choices[OPTIONS_AMOUNT] = { "Szerokosc planszy:   " + to_string(width) + "    ", "Wysokosc planszy:   " + to_string(height) + "    ", " ", gamemode ? "Sciany wylaczone    " : "Sciany wlaczone    ", "Graj   " };
 		choices[2] = getGameSpeed();
 		showMenu(choices, OPTIONS_AMOUNT, toPrint, menuCursor);
-		//showOptions(menuCursor);
 		menuCursor = manageMenu(OPTIONS_AMOUNT, menuCursor, selectOption);
 		clear();
 	} while (menuCursor >= 0);
@@ -583,24 +542,6 @@ int manageMenu(int optionsAmount, int menuCursor, int(*functionHandler)(int))
 	return menuCursor;
 }
 
-void showSpeedMenu(int menuCursor)
-{
-	string choices[3] = { "Wolno   ", "Standardowo   ", "Szybko   " };
-	string toPrint = "Wybierz predkosc rozgrywki\n";
-	toPrint = "\n";
-	for (int i = 0; i < 3; i++)
-	{
-		toPrint += "  ";
-		if (i == menuCursor)
-		{
-			toPrint += " >";
-		}
-		toPrint += choices[i];
-		toPrint += "\n";
-	}
-	cout << toPrint;
-}
-
 void saveScore(string nick, int score)
 {
 	fstream file;
@@ -608,24 +549,26 @@ void saveScore(string nick, int score)
 	int i = 0;
 	string nickBuffer;
 	int scoreBuffer;
+	int timeBuffer;
 	string toSave = "";
-	while (file >> nickBuffer && file >> scoreBuffer)
+	while (file >> nickBuffer && file >> scoreBuffer && file >>timeBuffer)
 	{
 		if (score >= scoreBuffer)
 		{
-			toSave += nick + "\n" + to_string(score) + "\n";
+			toSave += nick + "\n" + to_string(score) + "\n" + to_string(playTime) + "\n";
 			score = scoreBuffer;
 			nick = nickBuffer;
+			playTime = timeBuffer;
 		}
 		else
 		{
-			toSave += nickBuffer + "\n" + to_string(scoreBuffer) + "\n";
+			toSave += nickBuffer + "\n" + to_string(scoreBuffer) + "\n" + to_string(timeBuffer) + "\n";
 		}
 		i++;
 	}
 	if (i < 10)
 	{
-		toSave += nick + "\n" + to_string(score);
+		toSave += nick + "\n" + to_string(score) + "\n" + to_string(playTime);
 	}
 	file.close();
 	file.open("highscores.txt", fstream::out);
