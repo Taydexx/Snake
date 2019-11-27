@@ -1,5 +1,5 @@
 ﻿
-#include "pch.h"
+#define _CRT_SECURE_NO_DEPRECATE
 #include <conio.h>
 #include <Windows.h>
 #include <ctime>
@@ -402,19 +402,22 @@ bool changeGamemode()
 void showHighscores()
 {
 	system("cls");
-	ifstream file;
-	file.open("highscores.txt");
+	FILE *file = NULL;
+	file = fopen("highscores.txt", "r");
 	int i = 1;
-	string nick;
-	int score;
-	int time;
+	char nick[256];
+	char score[10];
+	char time[10];
 	printf("\n   Nick              Punkty   Czas\n");
-	while (file >> nick && file >> score && file >> time && i <= 10)
+	while (fgets(nick, 255, file) && fgets(score, 10, file) && fgets(time, 10, file) && i <= 10)
 	{
-		printf("%-2d %-15s   %6d   %4d\n", i, nick.c_str(), score, time);
+		strtok(nick, "\n");
+		strtok(score, "\n");
+		strtok(time, "\n");
+		printf("%-2d %-15s   %6s   %4s\n", i, nick, score, time);
 		i++;
 	}
-	file.close();
+	fclose(file);
 	printf("\n   >Nacisnij przycisk");
 	_getch();
 	system("cls");
