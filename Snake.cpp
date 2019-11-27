@@ -579,21 +579,26 @@ void saveScore(string nick, int score)
 
 void loadOptions()
 {
-	fstream file;
-	file.open("options.txt");
-	file >> height;
-	file >> width;
-	file >> delay;
-	file >> gamemode;
-	file.close();
+	FILE * file;
+	file = fopen("options.txt", "r");
+	char buffC[10];
+	fgets(buffC, 10, file);
+	height = atoi(buffC);	
+	fgets(buffC, 10, file);
+	width = atoi(buffC);	
+	fgets(buffC, 10, file);
+	delay = atoi(buffC);	
+	fgets(buffC, 10, file);
+	gamemode = atoi(buffC);
+	fclose(file);
 }
 
 void saveOptions()
 {
-	fstream file;
-	file.open("options.txt", fstream::out);
-	file << height << endl<< width << endl << delay << endl << gamemode;
-	file.close();
+	FILE * file;
+	file = fopen("options.txt", "w");
+	fprintf(file, "%d\n%d\n%d\n%d\n", height, width, delay, gamemode);
+	fclose(file);
 }
 
 void mainMenu()
