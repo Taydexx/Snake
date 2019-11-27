@@ -62,7 +62,6 @@ int selectOption(int menuCursor);
 void runOptions();
 string getGameSpeed();
 int selectSpeed(int menuCursor);
-void showSpeedMenu(int menuCursor);
 void mainMenu();
 void saveScore(string nick, int score);
 void loadOptions();
