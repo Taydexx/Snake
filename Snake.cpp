@@ -3,7 +3,6 @@
 #include <conio.h>
 #include <Windows.h>
 #include <ctime>
-#include <fstream>
 #include <string>
 
 const char KEY_UP = 'w';
@@ -352,7 +351,6 @@ char * getNick()
 	static char charArray[16];
 	printf("Podaj imie (maksymalna dlugosc 15) \n");
 	scanf_s("%15s", charArray, (unsigned)_countof(charArray));
-	string nick = charArray;
 	system("cls");
 	return charArray;
 }
