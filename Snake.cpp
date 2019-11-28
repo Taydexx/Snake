@@ -48,7 +48,7 @@ bool checkForPoint(int destX, int destY, int x, int y, int *score);
 void createApple(int *x, int *y, char **map);
 int playGame();
 void createGame();
-string getNick();
+char * getNick();
 void exit();
 int setIntValue();
 int setGameSpeed();
@@ -63,7 +63,7 @@ void runOptions();
 string getGameSpeed();
 int selectSpeed(int menuCursor);
 void mainMenu();
-void saveScore(string nick, int score);
+void saveScore(char * nick, int score);
 void loadOptions();
 void saveOptions();
 void mainMenu();
@@ -347,14 +347,14 @@ void createGame()
 	saveScore(getNick(), playGame());
 }
 
-string getNick()
+char * getNick()
 {
-	char charArray[16];
+	static char charArray[16];
 	printf("Podaj imie (maksymalna dlugosc 15) \n");
 	scanf_s("%15s", charArray, (unsigned)_countof(charArray));
 	string nick = charArray;
 	system("cls");
-	return nick;
+	return charArray;
 }
 
 void exit()
@@ -405,11 +405,11 @@ void showHighscores()
 	FILE *file = NULL;
 	file = fopen("highscores.txt", "r");
 	int i = 1;
-	char nick[256];
+	char nick[16];
 	char score[10];
 	char time[10];
 	printf("\n   Nick              Punkty   Czas\n");
-	while (fgets(nick, 255, file) && fgets(score, 10, file) && fgets(time, 10, file) && i <= 10)
+	while (fgets(nick, 15, file) && fgets(score, 10, file) && fgets(time, 10, file) && i <= 10)
 	{
 		strtok(nick, "\n");
 		strtok(score, "\n");
@@ -544,9 +544,9 @@ int manageMenu(int optionsAmount, int menuCursor, int(*functionHandler)(int))
 	return menuCursor;
 }
 
-void saveScore(string nick, int score)
+void saveScore(char * nick, int score)
 {
-	fstream file;
+	/*fstream file;
 	file.open("highscores.txt");
 	int i = 0;
 	string nickBuffer;
@@ -574,7 +574,54 @@ void saveScore(string nick, int score)
 	}
 	file.close();
 	file.open("highscores.txt", fstream::out);
-	file << toSave;
+	file << toSave;*/
+	FILE * file;
+	file = fopen("highscores.txt", "r");
+	char nickBuff[16];
+	char nicks[10][16];
+	char scoreBuff[10];
+	int scoreArr[10];
+	int times[10];
+	char timeBuff[10];
+	int i = 0;
+	while (fgets(nickBuff, 15, file) && fgets(scoreBuff, 10, file) && fgets(timeBuff, 10, file))
+	{
+		strtok(nickBuff, "\n");
+		strtok(scoreBuff, "\n");
+		strtok(timeBuff, "\n");
+		if (score > atoi(scoreBuff))
+		{
+			scoreArr[i] = score;
+			score = atoi(scoreBuff);
+			strcpy(nicks[i], nick);
+			nick = nickBuff;
+			times[i] = playTime;
+			playTime = atoi(timeBuff);
+		}
+		else
+		{
+			scoreArr[i] = atoi(scoreBuff);
+			strcpy(nicks[i], nickBuff);
+			times[i] = atoi(timeBuff);
+		}
+		i++;
+	}
+	if (i < 10)
+	{
+		scoreArr[i] = score;
+		strcpy(nicks[i], nick);
+		times[i] = playTime;
+		i++;
+	}
+	//fclose(file1);
+	fclose(file);
+	file = fopen("highscores.txt", "w");
+	for (int j = 0; j < i; j++)
+	{
+		fprintf(file, "%s\n%d\n%d\n", nicks[j], scoreArr[j], times[j]);
+	}
+
+	fclose(file);
 }
 
 void loadOptions()
