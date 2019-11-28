@@ -546,35 +546,6 @@ int manageMenu(int optionsAmount, int menuCursor, int(*functionHandler)(int))
 
 void saveScore(char * nick, int score)
 {
-	/*fstream file;
-	file.open("highscores.txt");
-	int i = 0;
-	string nickBuffer;
-	int scoreBuffer;
-	int timeBuffer;
-	string toSave = "";
-	while (file >> nickBuffer && file >> scoreBuffer && file >>timeBuffer)
-	{
-		if (score >= scoreBuffer)
-		{
-			toSave += nick + "\n" + to_string(score) + "\n" + to_string(playTime) + "\n";
-			score = scoreBuffer;
-			nick = nickBuffer;
-			playTime = timeBuffer;
-		}
-		else
-		{
-			toSave += nickBuffer + "\n" + to_string(scoreBuffer) + "\n" + to_string(timeBuffer) + "\n";
-		}
-		i++;
-	}
-	if (i < 10)
-	{
-		toSave += nick + "\n" + to_string(score) + "\n" + to_string(playTime);
-	}
-	file.close();
-	file.open("highscores.txt", fstream::out);
-	file << toSave;*/
 	FILE * file;
 	file = fopen("highscores.txt", "r");
 	char nickBuff[16];
@@ -613,7 +584,6 @@ void saveScore(char * nick, int score)
 		times[i] = playTime;
 		i++;
 	}
-	//fclose(file1);
 	fclose(file);
 	file = fopen("highscores.txt", "w");
 	for (int j = 0; j < i; j++)
