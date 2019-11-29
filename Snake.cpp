@@ -402,20 +402,23 @@ void showHighscores()
 	system("cls");
 	FILE *file = NULL;
 	file = fopen("highscores.txt", "r");
-	int i = 1;
-	char nick[16];
-	char score[10];
-	char time[10];
-	printf("\n   Nick              Punkty   Czas\n");
-	while (fgets(nick, 15, file) && fgets(score, 10, file) && fgets(time, 10, file) && i <= 10)
+	printf("\n   Nick              Punkty    Czas\n");
+	if (file)
 	{
-		strtok(nick, "\n");
-		strtok(score, "\n");
-		strtok(time, "\n");
-		printf("%-2d %-15s   %6s   %4s\n", i, nick, score, time);
-		i++;
+		int i = 1;
+		char nick[16];
+		char score[10];
+		char time[10];
+		while (fgets(nick, 15, file) && fgets(score, 10, file) && fgets(time, 10, file) && i <= 10)
+		{
+			strtok(nick, "\n");
+			strtok(score, "\n");
+			strtok(time, "\n");
+			printf("%-2d %-15s   %6s   %4ss\n", i, nick, score, time);
+			i++;
+		}
+		fclose(file);
 	}
-	fclose(file);
 	printf("\n   >Nacisnij przycisk");
 	_getch();
 	system("cls");
@@ -478,11 +481,11 @@ int selectOption(int menuCursor)
 {
 	switch (menuCursor)
 	{
-	case 0: width = setIntValue(); break;
-	case 1: height = setIntValue(); break;
-	case 2:	delay = setGameSpeed(); break;
-	case 3: gamemode = changeGamemode(); break;
-	case 4: exit(); return QUIT;
+	case 1: width = setIntValue(); break;
+	case 2: height = setIntValue(); break;
+	case 3:	delay = setGameSpeed(); break;
+	case 4: gamemode = changeGamemode(); break;
+	case 0: exit(); return QUIT;
 	}
 	return menuCursor;
 }
@@ -494,8 +497,8 @@ void runOptions()
 	string toPrint = "\n";
 	do
 	{
-		string choices[OPTIONS_AMOUNT] = { "Szerokosc planszy:   " + to_string(width) + "    ", "Wysokosc planszy:   " + to_string(height) + "    ", " ", gamemode ? "Sciany wylaczone    " : "Sciany wlaczone    ", "Graj   " };
-		choices[2] = getGameSpeed();
+		string choices[OPTIONS_AMOUNT] = {  "Graj   " , "Szerokosc planszy:   " + to_string(width) + "    ", "Wysokosc planszy:   " + to_string(height) + "    ", " ", gamemode ? "Sciany wylaczone    " : "Sciany wlaczone    "};
+		choices[3] = getGameSpeed();
 		showMenu(choices, OPTIONS_AMOUNT, toPrint, menuCursor);
 		menuCursor = manageMenu(OPTIONS_AMOUNT, menuCursor, selectOption);
 		clear();
@@ -553,28 +556,33 @@ void saveScore(char * nick, int score)
 	int times[10];
 	char timeBuff[10];
 	int i = 0;
-	while (fgets(nickBuff, 15, file) && fgets(scoreBuff, 10, file) && fgets(timeBuff, 10, file))
+	if (file)
 	{
-		strtok(nickBuff, "\n");
-		strtok(scoreBuff, "\n");
-		strtok(timeBuff, "\n");
-		if (score > atoi(scoreBuff))
+		while (fgets(nickBuff, 15, file) && fgets(scoreBuff, 10, file) && fgets(timeBuff, 10, file))
 		{
-			scoreArr[i] = score;
-			score = atoi(scoreBuff);
-			strcpy(nicks[i], nick);
-			nick = nickBuff;
-			times[i] = playTime;
-			playTime = atoi(timeBuff);
+			strtok(nickBuff, "\n");
+			strtok(scoreBuff, "\n");
+			strtok(timeBuff, "\n");
+			if (score > atoi(scoreBuff))
+			{
+				scoreArr[i] = score;
+				score = atoi(scoreBuff);
+				strcpy(nicks[i], nick);
+				nick = nickBuff;
+				times[i] = playTime;
+				playTime = atoi(timeBuff);
+			}
+			else
+			{
+				scoreArr[i] = atoi(scoreBuff);
+				strcpy(nicks[i], nickBuff);
+				times[i] = atoi(timeBuff);
+			}
+			i++;
 		}
-		else
-		{
-			scoreArr[i] = atoi(scoreBuff);
-			strcpy(nicks[i], nickBuff);
-			times[i] = atoi(timeBuff);
-		}
-		i++;
+		fclose(file);
 	}
+
 	if (i < 10)
 	{
 		scoreArr[i] = score;
@@ -582,7 +590,6 @@ void saveScore(char * nick, int score)
 		times[i] = playTime;
 		i++;
 	}
-	fclose(file);
 	file = fopen("highscores.txt", "w");
 	for (int j = 0; j < i; j++)
 	{
@@ -596,16 +603,19 @@ void loadOptions()
 {
 	FILE * file;
 	file = fopen("options.txt", "r");
-	char buffC[10];
-	fgets(buffC, 10, file);
-	height = atoi(buffC);	
-	fgets(buffC, 10, file);
-	width = atoi(buffC);	
-	fgets(buffC, 10, file);
-	delay = atoi(buffC);	
-	fgets(buffC, 10, file);
-	gamemode = atoi(buffC);
-	fclose(file);
+	if (file)
+	{
+		char buffC[10];
+		fgets(buffC, 10, file);
+		height = atoi(buffC);
+		fgets(buffC, 10, file);
+		width = atoi(buffC);
+		fgets(buffC, 10, file);
+		delay = atoi(buffC);
+		fgets(buffC, 10, file);
+		gamemode = atoi(buffC);
+		fclose(file);
+	}
 }
 
 void saveOptions()
